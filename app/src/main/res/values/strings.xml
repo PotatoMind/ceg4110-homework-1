@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">CEG4110 Homework 1</string>
+    <string name="filledText">Write Stuff Here</string>
+    <string name="filledHint">Pls just write anything</string>
+    <string name="buttonText">Press Me</string>
+    <string name="colorText">%1$s: %2$s</string>
+    <string name="action_drawing">Part 2</string>
+    <string name="action_color">Part 1</string>
+    <string name="clearButtonText">Clear</string>
+    <string name="saveButtonText">Save</string>
+</resources>

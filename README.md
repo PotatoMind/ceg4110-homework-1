@@ -17,8 +17,11 @@ A phone with the latest Android version installed, which is currently version 9.
 ### Installing
 
 1. Download the GitHub directory.
+![Image 1](./resources/Screenshot_1.png "Image 1")
 2. Extract the folder
+![Image 2](./resources/Screenshot_2.png "Image 2")
 3. Navigate to and open bin/app-release.apk
+![Image 3](./resources/Screenshot_3.png "Image 3")
 4. Install application
 
 ## Built With

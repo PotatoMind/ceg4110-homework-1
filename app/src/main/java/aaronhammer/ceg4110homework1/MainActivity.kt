@@ -54,8 +54,6 @@ class MainActivity : AppCompatActivity() {
             )
             val color = Color.argb(255, xr, xg, xb)
             txtView.setTextColor(color)
-            val chngColor = Toast.makeText(this, "I'm a potato", Toast.LENGTH_LONG)
-            chngColor.show()
         }
     }
 
@@ -67,20 +65,15 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_color -> {
             val intent = Intent(this, MainActivity::class.java)
-            // start your next activity
             startActivity(intent)
             true
         }
-
         R.id.action_drawing -> {
             val intent = Intent(this, Main2Activity::class.java)
             startActivity(intent)
             true
         }
-
         else -> {
-            // If we got here, the user's action was not recognized.
-            // Invoke the superclass to handle it.
             super.onOptionsItemSelected(item)
         }
     }

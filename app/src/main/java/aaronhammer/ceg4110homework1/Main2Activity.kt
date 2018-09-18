@@ -15,19 +15,23 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_main2.*
 import tech.picnic.fingerpaintview.FingerPaintImageView
 import java.io.FileOutputStream
-import java.io.IOException
 import android.graphics.drawable.BitmapDrawable
-import android.content.ContextWrapper
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Environment
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.widget.Toast
 import java.io.File
 import java.util.*
 
 
 class Main2Activity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, View.OnClickListener {
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+    }
+
+    /*
+     * If the clear or save buttons are clicked, their respective functions are called
+     */
     override fun onClick(v: View?) {
         val finger = findViewById<FingerPaintImageView>(R.id.finger)
         when (v?.id) {
@@ -36,56 +40,46 @@ class Main2Activity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, View
         }
     }
 
+    /*
+     * Gets the result of the permission request. Will tell the program that the permission was granted or not
+     */
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             1 -> {
-                // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
                 } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
+                    // Do nothing
                 }
                 return
             }
-
-            // Add other 'when' lines to check for other
-            // permissions this app might request.
             else -> {
                 // Ignore all other requests.
             }
         }
     }
 
+    /*
+     * Checks to see if the permissions to saved images are there. If not, it requests the permission
+     */
     fun checkPermission() {
-        // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-
-            // Permission is not granted
-            // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                             Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
             } else {
-                // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this,
                         arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                         1)
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
         } else {
             // Permission has already been granted
         }
     }
 
+    /*
+     * Gets the bitmap, asks for saving permissions, and then saves to external storage
+     */
     fun saveImage() {
         val finger = findViewById<FingerPaintImageView>(R.id.finger)
         val drawable = finger.drawable
@@ -96,8 +90,10 @@ class Main2Activity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, View
         saveToExternalStorage(bitmap, fileName)
     }
 
+    /*
+     * Saves bitmap to external storage
+     */
     private fun saveToExternalStorage(bitmapImage: Bitmap, fileName: String): String {
-        // path to /data/data/yourapp/app_data/imageDir
         val root = Environment.getExternalStorageDirectory().toString()
         val dir = File("$root/saved_images")
         if (!dir.exists()) {
@@ -115,9 +111,14 @@ class Main2Activity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, View
             out.close()
         } catch (e: Exception) {
             e.printStackTrace()
+            val toast = Toast.makeText(this, "Picture couldn't be saved!", Toast.LENGTH_LONG)
+            toast.show()
         }
 
         //sendBroadcast(Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())))
+
+        val toast = Toast.makeText(this, "Picture saved in $root/saved_images", Toast.LENGTH_LONG)
+        toast.show()
         return file.absolutePath
     }
 
@@ -168,31 +169,29 @@ class Main2Activity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, View
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
     }
 
-    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-    }
-
+    /*
+     * Creates the action bar menu options when it is opened
+     */
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.item, menu)
         return true
     }
 
+    /*
+     * When an option in the action bar is selected, it changes the activity of the program
+     */
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_color -> {
             val intent = Intent(this, MainActivity::class.java)
-            // start your next activity
             startActivity(intent)
             true
         }
-
         R.id.action_drawing -> {
             val intent = Intent(this, Main2Activity::class.java)
             startActivity(intent)
             true
         }
-
         else -> {
-            // If we got here, the user's action was not recognized.
-            // Invoke the superclass to handle it.
             super.onOptionsItemSelected(item)
         }
     }

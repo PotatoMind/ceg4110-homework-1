@@ -1,5 +1,6 @@
 package aaronhammer.ceg4110homework1
 
+import android.Manifest
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -17,8 +18,13 @@ import java.io.FileOutputStream
 import java.io.IOException
 import android.graphics.drawable.BitmapDrawable
 import android.content.ContextWrapper
-import android.util.Log
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Environment
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import java.io.File
+import java.util.*
 
 
 class Main2Activity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, View.OnClickListener {
@@ -30,36 +36,89 @@ class Main2Activity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, View
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            1 -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
+            }
+        }
+    }
+
+    fun checkPermission() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        1)
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            // Permission has already been granted
+        }
+    }
+
     fun saveImage() {
         val finger = findViewById<FingerPaintImageView>(R.id.finger)
         val drawable = finger.drawable
         val bitmapDrawable = drawable as BitmapDrawable
         val bitmap = bitmapDrawable.bitmap
-        val fileName = "AwesomePic.png"
-        saveToInternalStorage(bitmap, fileName)
+        val fileName = "AwesomePic"
+        checkPermission()
+        saveToExternalStorage(bitmap, fileName)
     }
 
-    private fun saveToInternalStorage(bitmapImage: Bitmap, fileName: String): String {
-        val cw = ContextWrapper(applicationContext)
+    private fun saveToExternalStorage(bitmapImage: Bitmap, fileName: String): String {
         // path to /data/data/yourapp/app_data/imageDir
-        val directory = cw.getDir("imageDir", MODE_PRIVATE)
-        Log.d("Test", "/$directory")
-        val myPath = File(directory, fileName)
-        var os: FileOutputStream? = null
+        val root = Environment.getExternalStorageDirectory().toString()
+        val dir = File("$root/saved_images")
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        val rnd = Random()
+        val num = rnd.nextInt(10000)
+        val file = File(dir, "$fileName-$num.png")
+        if (file.exists())
+            file.delete()
         try {
-            os = FileOutputStream(myPath)
-            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, os)
+            val out = FileOutputStream(file)
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 90, out)
+            out.flush()
+            out.close()
         } catch (e: Exception) {
             e.printStackTrace()
-        } finally {
-            try {
-                os!!.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
         }
-        return directory.absolutePath
+
+        //sendBroadcast(Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())))
+        return file.absolutePath
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
